@@ -1,0 +1,22 @@
+Package: parTreat
+Type: Package
+Title: Efficiently Estimate Treatment Effects Based On A Parametric Model For Treatment Effects
+Version: 0.1.0
+Date: 2021-08-01
+Authors@R: c(
+    person("Susan", "Athey", role = "aut"),
+    person("Peter J.", "Bickel", role = "aut"),
+    person("Aiyou", "Chen", role = "aut"),
+    person("Guido W.", "Imbens", role = "aut"),
+    person("Michael", "Pollmann", email = "pollmann@stanford.edu", role = c("aut","cre")))
+Maintainer: Michael Pollmann <pollmann@stanford.edu>
+Description: Efficiently estimate treatment effects imposing a parametric assumption on treatment effects of the form Y(1) = h(Y(0),theta).
+    Currently two estimators for the additive model Y(1) = Y(0) + theta are implemented, as well as a helper function to use them to estimate treatment effects based on a multiplicative model.
+Imports: 
+    Rcpp,
+    pracma,
+    stats
+LinkingTo: Rcpp
+License: MIT + file LICENSE
+Encoding: UTF-8
+RoxygenNote: 7.1.1
