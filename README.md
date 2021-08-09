@@ -67,4 +67,4 @@ Please use the Matlab replication code to exactly replicate the results and for 
 
 ## Reference
 
-Susan Athey, Peter Bickel, Aiyou Chen, Guido Imbens, and Michael Pollmann. \emph{Semiparametric Estimation of Treatment Effects in Randomized Experiments}. 2021.
+Susan Athey, Peter J. Bickel, Aiyou Chen, Guido W. Imbens, and Michael Pollmann. **Semiparametric Estimation of Treatment Effects in Randomized Experiments**. 2021.
