@@ -15,8 +15,8 @@ estimate_density_d_logs(X, ...)
 a list with four elements:
     \item{xf}{numerical vector, the points where the density was estimated (sorted unique points in X)}
     \item{f}{matrix with number of rows equal to length(xf) and three columns for the density, its first derivative, and its second derivative}
-    \item{d1_logf}{the first derivative of the log density, calculated as f[,2]/f[,1]}
-    \item{d2_logf}{the second derivative of the log density, calculated as (f[,1]*f[,3] - f[,2]^2)/f[,1]^2}
+    \item{d1_logf}{(unless estDerivs is set to FALSE) the first derivative of the log density, calculated as f[,2]/f[,1]}
+    \item{d2_logf}{(unless estDerivs is set to FALSE) the second derivative of the log density, calculated as (f[,1]*f[,3] - f[,2]^2)/f[,1]^2}
 }
 \description{
 Wrapper around estimate_density_sorted to calculate the first and second derivative of the log of the density.

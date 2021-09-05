@@ -35,10 +35,12 @@ If d2_logf is null but calc_se is TRUE (default), the density (and its derivativ
 \item{calc_se}{logical, should standard errors be calculated? (default = TRUE)
 This is slower if d1_logf but not d2_logf is provided as then the density needs to be estimated for standard errors but not for the point estimate.}
 
-\item{...}{additional arguments passed on estimate_density_d_logs for density estimation. DO NOT DISABLE ESTIMATION OF DERIVATIVES.}
+\item{...}{additional arguments passed on estimate_density_d_logs for density estimation.}
 }
 \value{
-list of two elements if calc_se = TRUE or one element otherwise: \item{tau}{the point estimate of the treatment effect} \item{se}{the estimated standard error (if calc_se = TRUE)}
+list of two elements if calc_se = TRUE or one element otherwise: 
+        \item{tau}{the point estimate of the treatment effect}
+        \item{se}{(if calc_se = TRUE) the estimated standard error}
 }
 \description{
 Efficiently estimate the treatment effect under an additive model based on the influence function.

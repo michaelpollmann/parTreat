@@ -17,9 +17,9 @@ If xf is NULL but d2_logf is supplied, it is assumed that the density was estima
 \item{d2_logf}{numeric vector, (estimates of) the second derivative of the log density of the control observations X.
 If d2_logf is null, the density (and its derivatives) of X is estimated using estimate_density_d_logs.}
 
-\item{n}{integer, the sample size. Defaults to length(X)/(1-p)}
+\item{n}{integer, the sample size. Defaults to length(X)/(1-p).}
 
-\item{...}{additional arguments passed on estimate_density_d_logs for density estimation. DO NOT DISABLE ESTIMATION OF DERIVATIVES.}
+\item{...}{additional arguments passed on estimate_density_d_logs for density estimation.}
 }
 \value{
 the estimated standard error of the efficient additive treatment effect estimators.

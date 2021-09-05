@@ -1,8 +1,8 @@
 Package: parTreat
 Type: Package
 Title: Efficiently Estimate Treatment Effects Based On A Parametric Model For Treatment Effects
-Version: 0.1.0
-Date: 2021-08-01
+Version: 0.2.0
+Date: 2021-09-05
 Authors@R: c(
     person("Susan", "Athey", role = "aut"),
     person("Peter J.", "Bickel", role = "aut"),
@@ -15,7 +15,8 @@ Description: Efficiently estimate treatment effects imposing a parametric assump
 Imports: 
     Rcpp,
     pracma,
-    stats
+    stats,
+    utils
 LinkingTo: Rcpp
 License: MIT + file LICENSE
 Encoding: UTF-8

@@ -34,6 +34,12 @@
 #' log_to_level(est_eif_log,X,Y)
 #' @export
 log_to_level <- function(est_log, X_pop, Y_pop) {
+  # input checks
+  if(!is.list(est_log)) { stop("est_log must be a list object") }
+  if (!is.numeric(X_pop) || !is.numeric(Y_pop)) { stop("X_pop and Y_pop must be numeric") }
+  if (is.null(est_log$tau) || is.null(est_log$se)) { stop("tau or se missing from list est_log") }
+  if (!is.numeric(est_log$tau) || !is.numeric(est_log$se)) { stop("est_log$tau and est_log$se must be numeric") }
+  if (length(est_log$tau)>1 || length(est_log$se)>1) { stop("est_log$tau and est_log$se must be length 1") }
   
   mu_X <- mean(X_pop)
   mu_Y <- mean(Y_pop)

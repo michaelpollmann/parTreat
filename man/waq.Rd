@@ -4,7 +4,15 @@
 \alias{waq}
 \title{Estimate treatment effects under additivity by weighting quantile differences}
 \usage{
-waq(X, Y, xf = NULL, d2_logf = NULL, ...)
+waq(
+  X,
+  Y,
+  xf = NULL,
+  d2_logf = NULL,
+  truncate_wf = TRUE,
+  return_weights = TRUE,
+  ...
+)
 }
 \arguments{
 \item{X}{numeric vector, the outcomes of the control observations.}
@@ -17,10 +25,14 @@ If xf is NULL but d2_logf is supplied, it is assumed that the density was estima
 \item{d2_logf}{numeric vector, (estimates of) the second derivative of the log density of the control observations X.
 If d2_logf is null, the density (and its derivatives) of X is estimated using estimate_density_d_logs.}
 
-\item{...}{additional arguments passed on estimate_density_d_logs for density estimation. DO NOT DISABLE ESTIMATION OF DERIVATIVES.}
+\item{truncate_wf}{logical, should weights be truncated if (normalized) w/f is too large? (default TRUE)}
+
+\item{return_weights}{logical, should the weights be returned?}
+
+\item{...}{additional arguments passed on estimate_density_d_logs for density estimation.}
 }
 \value{
-list of two elements: \item{tau}{the point estimate of the treatment effect} \item{se}{the estimated standard error}
+list of two elements (three if return_weights is TRUE): \item{tau}{the point estimate of the treatment effect} \item{se}{the estimated standard error} \item{w}{(if return_weights is TRUE) weights, length equal to length of longer of X and Y, in order of sorted X and Y}
 }
 \description{
 Efficiently estimate the treatment effect under an additive model based on taking a weighted average of the quantile differences:

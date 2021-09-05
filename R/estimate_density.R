@@ -27,96 +27,97 @@
 #' plot(X,fX)
 #' @export
 estimate_density_sorted <- function(x0,dat,estDerivs=TRUE,kernel="triweight",sd_dat="norm90",adapt=TRUE,fdat=NULL) {
-    # check that input data is sorted
-    if (is.unsorted(x0)) {
-        stop("x0 is not sorted")
+  # input checks
+  if (!is.numeric(x0) || !is.numeric(dat)) { stop("x0 and dat must be numeric") }
+  # check that input data is sorted
+  if (is.unsorted(x0)) {
+    stop("x0 is not sorted")
+  }
+  if (is.unsorted(dat)) {
+    stop("dat is not sorted")
+  }
+  # check optional arguments
+  if (! (kernel %in% c("triweight"))) {
+    stop(paste("kernel",kernel,"not implemented"))
+  }
+  if (! ((sd_dat %in% c("sd","norm90")) | 
+         (is.numeric(sd_dat) & (sd_dat > 0)))) {
+    stop(paste("sd_data",sd_dat,"not implemented. Must be positive number or one of ",
+               paste0("(","sd","norm90",")")))
+  }
+  if (! is.null(fdat)) {
+    if (! (length(fdat)==length(dat))) {
+      stop("fdat must have the same length as dat")
     }
-    if (is.unsorted(dat)) {
-        stop("dat is not sorted")
+    if (any(fdat <= 0)) {
+      stop("density fdat must be strictly positive for all points in dat")
     }
-    # check optional arguments
-    if (! (kernel %in% c("triweight"))) {
-        stop(paste("kernel",kernel,"not implemented"))
+  }
+  
+  # need density if adapt is TRUE
+  if ((adapt == TRUE) & is.null(fdat)) {
+    fdat <- estimate_density_sorted(dat,dat,estDerivs=FALSE,kernel=kernel,sd_dat=sd_dat,adapt=FALSE)
+  }
+  
+  # Silverman's rule constants for different kernel and order
+  # http://www.ssc.wisc.edu/~bhansen/718/NonParametrics1.pdf
+  if (kernel == "triweight") {
+    K <- K_tri
+    silv_const_d0 <- 3.15
+    silv_const_d1 <- 2.83
+    silv_const_d2 <- 2.70
+  }
+  
+  # estimate standard deviation of data
+  if (sd_dat == "sd") {
+    s <- stats::sd(dat)
+  } else if (sd_dat == "norm90") {
+    s <- (stats::quantile(dat,0.95)-stats::quantile(dat,0.05))/(2*stats::qnorm(0.95))
+  } else {
+    s <- sd_dat
+  }
+  
+  # bandwidth 
+  h_d0 <- s * silv_const_d0 / length(dat)^(1/5);
+  h_d1 <- s * silv_const_d1 / length(dat)^(1/(5+2));
+  h_d2 <- s * silv_const_d2 / length(dat)^(1/(5+4));
+  
+  # if the density at the data points is supplied, use an adaptive bandwidth
+  if (adapt & !is.null(fdat)) {
+    # adaptive kernel weights
+    alpha <- 0.5
+    lambda <- (fdat/exp(mean(log(fdat))))^(-alpha)
+    # adjust bandwidth for each observation
+    h_d0 <- h_d0 * lambda
+    h_d1 <- h_d1 * lambda
+    h_d2 <- h_d2 * lambda
+  }
+  
+  
+  # allocate output vector of estimated density
+  fx <- matrix(nrow=length(x0),ncol=(1+2*estDerivs))
+  
+  # estimate kernel density
+  if (estDerivs) {
+    h_pow_2 <- h_d1^2
+    h_pow_3 <- h_d2^3
+  }
+  for (i in seq(length(x0))) {
+    # don't recompute density if next point is the same as previous point
+    if (i>1) {
+      if (x0[i] == x0[i-1]) {
+        fx[i,] <- fx[i-1,]
+      }
     }
-    if (! ((sd_dat %in% c("sd","norm90")) | 
-           (is.numeric(sd_dat) & (sd_dat > 0)))) {
-        stop(paste("sd_data",sd_dat,"not implemented. Must be positive number or one of ",
-                   paste0("(","sd","norm90",")")))
+    if (is.na(fx[i,1])) {
+      fx[i,1] <- K(x0[i],dat,h_d0,h_d0,0);
+      if (estDerivs) {
+        fx[i,2] <- K(x0[i],dat,h_d1,h_pow_2,1);
+        fx[i,3] <- K(x0[i],dat,h_d2,h_pow_3,2);
+      }
     }
-    if (! is.null(fdat)) {
-        if (! (length(fdat)==length(dat))) {
-            stop("fdat must have the same length as dat")
-        }
-        if (any(fdat <= 0)) {
-            stop("density fdat must be strictly positive for all points in dat")
-        }
-    }
-    
-    # need density if adapt is TRUE
-    if ((adapt == TRUE) & is.null(fdat)) {
-        fdat <- estimate_density_sorted(dat,dat,estDerivs=FALSE,kernel=kernel,sd_dat=sd_dat,adapt=FALSE)
-    }
-    
-    # Silverman's rule constants for different kernel and order
-    # http://www.ssc.wisc.edu/~bhansen/718/NonParametrics1.pdf
-    
-    if (kernel == "triweight") {
-        K <- K_tri
-        silv_const_d0 <- 3.15
-        silv_const_d1 <- 2.83
-        silv_const_d2 <- 2.70
-    }
-    
-     # estimate standard deviation of data
-    if (sd_dat == "sd") {
-        s <- stats::sd(dat)
-    } else if (sd_dat == "norm90") {
-        s <- (stats::quantile(dat,0.95)-stats::quantile(dat,0.05))/(2*stats::qnorm(0.95))
-    } else {
-        s <- sd_dat
-    }
-    
-    # bandwidth 
-    h_d0 <- s * silv_const_d0 / length(dat)^(1/5);
-    h_d1 <- s * silv_const_d1 / length(dat)^(1/(5+2));
-    h_d2 <- s * silv_const_d2 / length(dat)^(1/(5+4));
-    
-    # if the density at the data points is supplied, use an adaptive bandwidth
-    if (adapt & !is.null(fdat)) {
-        # adaptive kernel weights
-        alpha <- 0.5
-        lambda <- (fdat/exp(mean(log(fdat))))^(-alpha)
-        # adjust bandwidth for each observation
-        h_d0 <- h_d0 * lambda
-        h_d1 <- h_d1 * lambda
-        h_d2 <- h_d2 * lambda
-    }
-    
-    
-    # allocate output vector of estimated density
-    fx <- matrix(nrow=length(x0),ncol=(1+2*estDerivs))
-    
-    # estimate kernel density
-    if (estDerivs) {
-        h_pow_2 <- h_d1^2
-        h_pow_3 <- h_d2^3
-    }
-    for (i in seq(length(x0))) {
-        # don't recompute density if next point is the same as previous point
-        if (i>1) {
-            if (x0[i] == x0[i-1]) {
-                fx[i,] <- fx[i-1,]
-            }
-        }
-        if (is.na(fx[i,1])) {
-            fx[i,1] <- K(x0[i],dat,h_d0,h_d0,0);
-            if (estDerivs) {
-                fx[i,2] <- K(x0[i],dat,h_d1,h_pow_2,1);
-                fx[i,3] <- K(x0[i],dat,h_d2,h_pow_3,2);
-            }
-        }
-    }
-    return(fx)
+  }
+  return(fx)
 }
 
 
@@ -131,8 +132,8 @@ estimate_density_sorted <- function(x0,dat,estDerivs=TRUE,kernel="triweight",sd_
 #' @return a list with four elements:
 #'     \item{xf}{numerical vector, the points where the density was estimated (sorted unique points in X)}
 #'     \item{f}{matrix with number of rows equal to length(xf) and three columns for the density, its first derivative, and its second derivative}
-#'     \item{d1_logf}{the first derivative of the log density, calculated as f[,2]/f[,1]}
-#'     \item{d2_logf}{the second derivative of the log density, calculated as (f[,1]*f[,3] - f[,2]^2)/f[,1]^2}
+#'     \item{d1_logf}{(unless estDerivs is set to FALSE) the first derivative of the log density, calculated as f[,2]/f[,1]}
+#'     \item{d2_logf}{(unless estDerivs is set to FALSE) the second derivative of the log density, calculated as (f[,1]*f[,3] - f[,2]^2)/f[,1]^2}
 #' @examples
 #' # draw a random sample with additive treatment effect
 #' X <- rexp(n=1000, rate=2)
@@ -152,17 +153,24 @@ estimate_density_sorted <- function(x0,dat,estDerivs=TRUE,kernel="triweight",sd_
 #' plot(seq(X)/length(X),w_waq)
 #' @export
 estimate_density_d_logs <- function(X,...) {
-    # points at which to estimate the density
-    xf <- sort(unique(X))
-    # density estimates
-    f <- estimate_density_sorted(x0=xf,dat=sort(X),...)
+  # input checks
+  if (!is.numeric(X)) { stop("X") }
+  # points at which to estimate the density
+  xf <- sort(unique(X))
+  # density estimates
+  f <- estimate_density_sorted(x0=xf,dat=sort(X),...)
+  # only if derivatives were estimated
+  if (ncol(f) > 1) {
     # first derivative of log density
     d1_logf <- f[,2]/f[,1]
     # second derivative of log density
     d2_logf <- (f[,1]*f[,3] - f[,2]^2)/f[,1]^2
-    
     return(list(xf = xf,
                 f = f,
                 d1_logf = d1_logf,
                 d2_logf = d2_logf))
+  } else {
+    return(list(xf = xf,
+                f = f))
+  }
 }
